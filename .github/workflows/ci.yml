@@ -36,8 +36,10 @@
             cache-from: type=gha
             cache-to: type=gha
             pull: true
-            push: true
             tags: ghcr.io/${{ github.repository }}:amd64
+            provenance: false
+            sbom: false
+            cgroup-parent: system.slice
 
     build-arm64:
       runs-on: ubuntu-24.04-arm
@@ -64,8 +66,10 @@
             cache-from: type=gha
             cache-to: type=gha
             pull: true
-            push: true
             tags: ghcr.io/${{ github.repository }}:arm64
+            provenance: false
+            sbom: false
+            cgroup-parent: system.slice
 
     manifest:
       needs: [build-amd64, build-arm64]
