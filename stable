@@ -45,9 +45,11 @@ RUN echo "keyboard-configuration console-setup/ask_detect boolean false" | debco
 
 RUN apt-get update && apt-get install -y --no-install-recommends packagekit gir1.2-packagekitglib-1.0 snapd gir1.2-snapd-2 flatpak gir1.2-flatpak-1.0 && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/history.log,apt/term.log,dpkg.log} && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
+RUN rm -f /etc/resolv.conf && ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf || true
+
 FROM scratch
 
-ENTRYPOINT [ "/opt/tini", "--", "/sbin/init" ]
+ENTRYPOINT ["/sbin/init" ]
 CMD ["/bin/bash"]
 
 COPY --link --from=interim-layer / /
