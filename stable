@@ -45,9 +45,14 @@ RUN echo "keyboard-configuration console-setup/ask_detect boolean false" | debco
 
 RUN apt-get update && apt-get install -y --no-install-recommends packagekit gir1.2-packagekitglib-1.0 snapd gir1.2-snapd-2 flatpak gir1.2-flatpak-1.0 && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/history.log,apt/term.log,dpkg.log} && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
+ARG TINI_VERSION=0.19.0
+ARG TINI_ARCH=$(dpkg --print-architecture)
+
+ADD --chmod=755 https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-${TINI_ARCH} /opt/tini
+
 FROM scratch
 
-ENTRYPOINT [ "/sbin/init" ]
+ENTRYPOINT [ "/opt/tini", "--", "/sbin/init" ]
 CMD ["/bin/bash"]
 
 COPY --link --from=interim-layer / /
