@@ -1,11 +1,11 @@
 ---
-  name: Publish Stable Image
+  name: Publish Devel Image
   on:
     schedule:
       - cron: '0 2 * * *'
     push:
       paths:
-        - 'stable'
+        - 'devel'
       branches:
         - latest
     workflow_dispatch:
@@ -26,7 +26,7 @@
           uses: docker/build-push-action@v6
           with:
             context: .
-            file: stable
+            file: devel
             platforms: linux/amd64
             cache-from: type=gha
             cache-to: type=gha
@@ -52,7 +52,7 @@
           uses: docker/build-push-action@v6
           with:
             context: .
-            file: stable
+            file: devel
             platforms: linux/arm64
             cache-from: type=gha
             cache-to: type=gha

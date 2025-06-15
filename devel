@@ -1,5 +1,5 @@
 # Use ubuntu's rolling tag as the base image
-FROM ubuntu:rolling AS base
+FROM ubuntu:devel AS base
 
 
 FROM base AS plymouth-builder
