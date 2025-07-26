@@ -4,9 +4,7 @@ FROM ubuntu:rolling AS base
 
 FROM base AS interim-layer
 
-RUN apt-get update && apt-get install --no-install-recommends -y debconf-utils && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/{history.log,term.log},dpkg.log}
-
-RUN apt-get update && apt-get install -y perl ubuntu-minimal ubuntu-standard grub-efi linux-headers-generic linux-image-generic && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/{history.log,term.log},dpkg.log} && deluser --remove-home ubuntu
+RUN userdel ubuntu && rm -rf /home/ubuntu
 
 RUN apt-get update && apt-get install -y --no-install-recommends snapd flatpak && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/history.log,apt/term.log,dpkg.log} && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
@@ -15,4 +13,4 @@ FROM scratch
 ENTRYPOINT ["/sbin/init" ]
 CMD ["/bin/bash"]
 
-COPY --link --from=interim-layer / /
+COPY --from=interim-layer / /
