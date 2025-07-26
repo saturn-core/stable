@@ -2,50 +2,13 @@
 FROM ubuntu:rolling AS base
 
 
-FROM base AS plymouth-builder
-
-#install deps related to plymouth
-RUN apt-get update && apt-get install --no-install-recommends -y meson git ca-certificates
-
-WORKDIR /branding
-
-RUN mkdir -p src_dir target_dir
-
-WORKDIR /branding/src_dir
-
-RUN git clone --single-branch -b main https://github.com/saturn-core/plymouth-theme.git && \
-    cd plymouth-theme && \
-    meson setup builddir && \
-    meson install -C builddir
-
-
 FROM base AS interim-layer
-
-COPY overrides /usr/share/glib-2.0/schemas/99_saturn.gschema.override
-
-# Configure plymouth and hosts
-COPY --from=plymouth-builder /usr/share/plymouth/themes/saturn-bgrt/* /usr/share/plymouth/themes/saturn-bgrt/
-
-RUN update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/saturn-bgrt/saturn-bgrt.plymouth 200
 
 RUN apt-get update && apt-get install --no-install-recommends -y debconf-utils && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/{history.log,term.log},dpkg.log}
 
-RUN echo "keyboard-configuration console-setup/ask_detect boolean false" | debconf-set-selections && \
-    echo "console-setup console-setup/charmap47 select UTF-8" | debconf-set-selections && \
-    echo "console-setup console-setup/codeset47 select Guess optimal character set" | debconf-set-selections && \
-    echo "console-setup/codesetcode string guess" | debconf-set-selections && \
-    echo "keyboard-configuration console-setup/detect detect-keyboard" | debconf-set-selections && \
-    echo "keyboard-configuration console-setup/detected note" | debconf-set-selections && \
-    echo "console-setup console-setup/fontface47 select Fixed" | debconf-set-selections && \
-    echo "console-setup/fontsize string 8x16" | debconf-set-selections && \
-    echo "console-setup console-setup/fontsize-fb47 select 8x16" | debconf-set-selections && \
-    echo "console-setup console-setup/fontsize-text47 select 8x16" | debconf-set-selections && \
-    echo "console-setup console-setup/store_defaults_in_debconf_db boolean true" | debconf-set-selections && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y perl ubuntu-minimal ubuntu-standard grub-efi plymouth-theme-spinner linux-headers-generic linux-image-generic && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/{history.log,term.log},dpkg.log} && deluser --remove-home ubuntu
+RUN apt-get update && apt-get install -y perl ubuntu-minimal ubuntu-standard grub-efi linux-headers-generic linux-image-generic && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/{history.log,term.log},dpkg.log} && deluser --remove-home ubuntu
 
-RUN apt-get update && apt-get install -y --no-install-recommends packagekit gir1.2-packagekitglib-1.0 snapd gir1.2-snapd-2 flatpak gir1.2-flatpak-1.0 && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/history.log,apt/term.log,dpkg.log} && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-RUN rm -f /etc/resolv.conf && ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf || true
+RUN apt-get update && apt-get install -y --no-install-recommends snapd flatpak && rm -rf /var/lib/apt/lists/* /var/log/{alternatives.log,apt/history.log,apt/term.log,dpkg.log} && flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 FROM scratch
 
